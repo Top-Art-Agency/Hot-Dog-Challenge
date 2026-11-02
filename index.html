@@ -58,6 +58,19 @@ button,input,select{font:inherit}
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Ctext x='20' y='70' font-size='54' transform='rotate(-18 50 50)'%3E%F0%9F%8C%AD%3C/text%3E%3Ctext x='105' y='160' font-size='54' transform='rotate(24 130 140)'%3E%F0%9F%8C%AD%3C/text%3E%3C/svg%3E");
   background-size:180px 180px;filter:grayscale(.4)}
 #show.no-pattern .pattern{display:none}
+/* motyw: Plakat */
+#show.theme-poster{--gold:#f4c64f;--gold2:#ffe39a;--muted:#cfc6de;
+  background:radial-gradient(ellipse at 18% 45%,rgba(255,40,140,.42),transparent 58%),radial-gradient(ellipse at 82% 45%,rgba(40,120,255,.34),transparent 58%),linear-gradient(90deg,#3d0a2c 0%,#16071b 47%,#070f1f 53%,#0a2242 100%)}
+#show.theme-poster .live{background:var(--gold);color:#1a0d14}
+.scan,.bolt{display:none}
+#show.theme-poster .scan{display:block;position:absolute;top:0;bottom:0;right:0;width:50%;pointer-events:none;opacity:.35;
+  background:repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 4px),linear-gradient(90deg,transparent,rgba(90,160,255,.08))}
+#show.theme-poster .bolt{display:block;position:absolute;left:50%;top:0;height:100%;width:9vh;transform:translateX(-50%);pointer-events:none;overflow:visible;animation:bolt 3.2s infinite}
+.bolt polyline{fill:none;stroke-linejoin:round;stroke-linecap:round}
+.bolt .glow{stroke:#7cc4ff;stroke-width:7;opacity:.5;filter:blur(6px)}
+.bolt .core{stroke:#f2f8ff;stroke-width:2.2}
+.bolt .branch{stroke:#cfe8ff;stroke-width:1.2;opacity:.8}
+@keyframes bolt{0%,100%{opacity:.85}4%{opacity:.25}7%{opacity:1}9%{opacity:.4}11%{opacity:.95}46%{opacity:.8}48%{opacity:.3}50%{opacity:1}70%{opacity:.75}}
 .vignette{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 55%,rgba(0,0,0,.5))}
 #show>header,#show>main,#show>footer{position:relative;z-index:1}
 
@@ -194,7 +207,7 @@ footer.bottom{padding:1.2vh 4vw 3.4vh}
       </div>
 
       <label class="field">Czas liczenia głosów (sekundy)<input id="f-duration" type="number" min="8" max="180" step="1"><span class="note">Do tego dochodzi ok. 3 s ciszy z werblem i 1,5 s ogłoszenia.</span></label>
-      <label class="field">Wygląd<select id="f-theme"><option value="royal">Król Gastronomii (zieleń i złoto)</option><option value="studio">Studio telewizyjne (granat)</option></select></label>
+      <label class="field">Wygląd<select id="f-theme"><option value="royal">Król Gastronomii (zieleń i złoto)</option><option value="poster">Plakat (róż, granat i błyskawica)</option><option value="studio">Studio telewizyjne (granat)</option></select></label>
       <label class="field check"><input id="f-pattern" type="checkbox"> Delikatny wzór z hot-dogów w tle</label>
       <label class="field check"><input id="f-intro" type="checkbox"> Zacznij od plakatu (znika po Spacji, potem rusza liczenie)</label>
       <label class="field check"><input id="f-sound" type="checkbox"> Efekty dźwiękowe (tykanie, werbel, uderzenie)</label>
@@ -210,7 +223,14 @@ footer.bottom{padding:1.2vh 4vw 3.4vh}
 </section>
 
 <section id="show" hidden>
-  <div class="pattern"></div><div class="vignette"></div>
+  <div class="pattern"></div><div class="scan"></div>
+  <svg class="bolt" viewBox="0 0 60 1000" preserveAspectRatio="none" aria-hidden="true">
+    <polyline class="glow" points="32,0 22,90 38,170 18,260 36,340 24,430 40,510 20,600 34,690 22,780 38,870 28,1000"/>
+    <polyline class="core" points="32,0 22,90 38,170 18,260 36,340 24,430 40,510 20,600 34,690 22,780 38,870 28,1000"/>
+    <polyline class="branch" points="38,170 52,205 46,240"/><polyline class="branch" points="24,430 8,470 14,500"/>
+    <polyline class="branch" points="20,600 6,640"/><polyline class="branch" points="38,870 54,905 48,930"/>
+  </svg>
+  <div class="vignette"></div>
   <header class="top">
     <div class="live"><i></i>NA ŻYWO</div>
     <div class="titles"><div id="show-title"></div></div>
@@ -423,7 +443,7 @@ let msgUntil=0, running=false, elapsed=0, last=0, raf=0, phase='idle', leader=-1
 const show=$('show');
 function openShow(){
   $('setup').hidden=true; show.hidden=false;
-  show.className=(config.theme==='studio'?'theme-studio':'theme-royal')+(config.pattern?'':' no-pattern');
+  show.className='theme-'+(['royal','poster','studio'].includes(config.theme)?config.theme:'royal')+(config.pattern?'':' no-pattern');
   $('show-title').textContent=config.title;
   [0,1].forEach(i=>{ $('name-'+i).textContent=config.names[i]; ['tag','badge','desc'].forEach(k=>{ const v=config[k+'s'][i]; $(k+'-'+i).textContent=v; $(k+'-'+i).hidden=!v; });
     const av=$('av-'+i); av.textContent='';
