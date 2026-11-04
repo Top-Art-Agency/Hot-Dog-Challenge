@@ -171,7 +171,7 @@ footer.bottom{padding:1.2vh 4vw 3.4vh}
 #poster .main{position:relative;height:92vh;max-width:90vw;object-fit:contain;border-radius:1.6vh;box-shadow:0 3vh 8vh rgba(0,0,0,.6);transform:scale(.96);transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
 #poster.on .main{transform:scale(1)}
 /* sterowanie */
-#controls{position:fixed;top:2.4vh;right:2vw;z-index:10;background:var(--panel);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px;transition:opacity .4s}
+#controls{display:none!important;position:fixed;top:2.4vh;right:2vw;z-index:10;background:var(--panel);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:10px;display:flex;flex-direction:column;gap:8px;transition:opacity .4s}
 #controls .btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
 #controls .btn{padding:9px 14px;font-size:14px}
 #controls .hint{font-size:11px;color:var(--muted);text-align:right}
@@ -230,7 +230,7 @@ footer.bottom{padding:1.2vh 4vw 3.4vh}
       <button class="btn primary" id="go">Przejdź do ekranu finału</button>
       <button class="btn" id="save">Pobierz gotowy plik pokazu</button>
     </div>
-    <p class="note"><b>Na ekranie finału:</b> Spacja start/pauza (przy plakacie: schowaj plakat i start) · P plakat · K plansza króla · M wyciszenie muzyki · R od nowa · F pełny ekran · H pokaż/ukryj przyciski. Przyciski są ukryte i pojawiają się na chwilę po ruchu myszką.</p>
+    <p class="note"><b>Na ekranie finału nie ma przycisków, wszystko robisz klawiszami:</b> Spacja start/pauza (przy plakacie: chowa plakat i rusza liczenie) · P plakat · K plansza króla · M wyciszenie muzyki · R od nowa · F pełny ekran · V nagraj wideo · U powrót do ustawień.</p>
     <p class="note">Gotowy plik zawiera wszystkie ustawienia, zdjęcia i muzykę, więc działa bez internetu. Jeśli wyniki są już wpisane, otwiera się od razu ekran finału. Jeśli nie, otwiera się ten formularz z wypełnionymi polami.</p>
   </div>
 </section>
@@ -532,18 +532,20 @@ function king(){ const on=!$('king').classList.contains('on'); $('poster').class
 /* ---------- interfejs ---------- */
 let uiTimer=0, recording=false;
 function hideUiSoon(){ clearTimeout(uiTimer); uiTimer=setTimeout(function h(){ if($('controls').matches(':hover')){ uiTimer=setTimeout(h,800); return; } show.classList.add('hide-ui'); }, 2000); }
-show.addEventListener('mousemove',()=>{ if(recording) return; show.classList.remove('hide-ui'); hideUiSoon(); });
+
 $('c-start').onclick=toggle; $('c-restart').onclick=reset; $('c-king').onclick=king; $('c-poster').onclick=posterToggle;
 function posterToggle(){ const on=!$('poster').classList.contains('on'); if(on&&running) toggle(); $('king').classList.remove('on'); $('poster').classList.toggle('on',on); }
 $('poster-bg').src=$('poster-img').src;
-$('c-edit').onclick=()=>{ reset(); show.hidden=true; $('setup').hidden=false; fillForm(); };
+function openSettings(){ reset(); show.hidden=true; $('setup').hidden=false; fillForm(); }
+$('c-edit').onclick=openSettings;
 async function fullscreen(){ try{ if(document.fullscreenElement) await document.exitFullscreen(); else await document.documentElement.requestFullscreen(); }catch{ toast('Użyj pełnego ekranu z menu przeglądarki.'); } }
 $('c-full').onclick=fullscreen;
 document.addEventListener('keydown',e=>{ if(show.hidden||e.repeat||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName)) return;
   const key=e.key.toLowerCase();
   if(e.code==='Space'){ e.preventDefault(); toggle(); } else if(key==='f') fullscreen(); else if(key==='r') reset();
   else if(key==='p') posterToggle(); else if(key==='k') king(); else if(key==='m') stopSong(true);
-  else if(key==='h'){ clearTimeout(uiTimer); show.classList.toggle('hide-ui'); } });
+  else if(key==='u') openSettings();
+  else if(key==='v'&&!$('c-rec').hidden) $('c-rec').click(); });
 const clock=()=>$('clock').textContent=new Date().toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}); clock(); setInterval(clock,1000);
 
 /* ---------- nagrywanie ---------- */
